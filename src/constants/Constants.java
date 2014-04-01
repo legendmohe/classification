@@ -25,6 +25,7 @@ public class Constants {
 	public static final String CLASSIFIER_SVM_TESTFILE_PATH =  "." + File.separator + "data" + File.separator + "cdata" + File.separator + "svm" + File.separator + "test.txt";
 	public static final String CLASSIFIER_SVM_MODELFILE_PATH =  "." + File.separator + "data" + File.separator + "cdata" + File.separator + "svm" + File.separator + "model.txt";
 	public static final String CLASSIFIER_SVM_RESULTFILE_PATH =  "." + File.separator + "data" + File.separator + "cdata" + File.separator + "svm" + File.separator + "result.txt";
+	public static final String CLASSIFIER_SVM_LABEL_PATH =  "." + File.separator + "data" + File.separator + "cdata" + File.separator + "svm" + File.separator + "labels.txt";
 	
 	public static final String CLASSIFIER_CENTERFILE_PATH =  "." + File.separator + "data" + File.separator + "cdata" + File.separator + "center.txt" ;
 	

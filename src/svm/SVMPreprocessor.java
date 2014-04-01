@@ -6,12 +6,36 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import model.DocumentVector;
 import model.FeatureTerm;
 
 public class SVMPreprocessor {
-	public static void processDocumentVectorToSVMFormatFile(HashMap<String, FeatureTerm> featureTermMap, ArrayList<DocumentVector> documentVectors, String filePathString) throws IOException {
+	public static HashMap<String, String> processClassLabel(Set<String> labels, String path) {
+		int labelindex = 0;
+		HashMap<String, String> classlabel = new HashMap<String, String>();
+		for (String label : labels) {
+			classlabel.put(label, String.valueOf(++labelindex) + ".0");
+		}
+		BufferedWriter bufferedWriter = null;
+		try {
+			bufferedWriter = new BufferedWriter(new FileWriter(path));
+			for (String label : classlabel.keySet()) {
+				bufferedWriter.write(label + ":" + classlabel.get(label) + "\n");
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+		}finally {
+			try {
+				bufferedWriter.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return classlabel;
+	}
+	public static void processDocumentVectorToSVMFormatFile(HashMap<String, String> labels, HashMap<String, FeatureTerm> featureTermMap, ArrayList<DocumentVector> documentVectors, String filePathString) throws IOException {
 		File saveFile = new File(filePathString);
 		if (saveFile.exists() == false) {
 			saveFile.createNewFile();
@@ -30,7 +54,8 @@ public class SVMPreprocessor {
 			bufferedWriter = new BufferedWriter(new FileWriter(saveFile));
 			for (DocumentVector documentVector : documentVectors) {
 				int index = 1;//从1开始
-				bufferedWriter.write(documentVector.getClassName());
+				String label = labels.get(documentVector.getClassName());
+				bufferedWriter.write(label);
 				for (String term : featureTermMap.keySet()) {
 					Double weight = documentVector.getTermWeight(term);
 					if (weight != null) {

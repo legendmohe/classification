@@ -1,8 +1,10 @@
 package similarity;
 
+import java.util.Comparator;
 import java.util.HashSet;
 
 import model.DocumentVector;
+import model.ObjectPair;
 
 public class EuclideanDistance implements Distance {
 
@@ -32,6 +34,23 @@ public class EuclideanDistance implements Distance {
 		similarity = Math.sqrt(similarity);
 		
 		return similarity;
+	}
+
+	@Override
+	public Comparator<ObjectPair<Integer, Double>> getComparator() {
+		return new Comparator<ObjectPair<Integer, Double>>() {
+			@Override
+			public int compare(ObjectPair<Integer, Double> o1,
+					ObjectPair<Integer, Double> o2) {
+				if ((Double)o1.getTwo() > (Double)o2.getTwo()) {
+					return 1;
+				}else if ((Double)o1.getTwo() < (Double)o2.getTwo()) {
+					return -1;
+				}else {
+					return 0;
+				}
+			}
+		};
 	}
 
 }

@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import junit.framework.Test;
 
@@ -27,6 +29,7 @@ import org.apache.lucene.store.FSDirectory;
 import result.ResultParser;
 import similarity.CosineDistance;
 import similarity.Distance;
+import similarity.EuclideanDistance;
 import similarity.MahalanobisDistance;
 import similarity.Similarity;
 import svm.SVMClassifier;
@@ -102,7 +105,7 @@ public   class  MainClass {
     	
     	classifierTermsaArrayListHashMap = Storer.loadFeatureMapFromFilePath(Constants.CLASSIFIER_FEATUREFILE_PATH);
     	
-    	Weighter weightor = new TFIDFWeighter();
+    	Weighter weightor = new FeatureWeighter();
     
 //    	VectorImageBuilder vectorImageBuilder = new VectorImageBuilder(Constants.CLASSIFIER_DOCPIC_PATH
 //    																	, classifierTermsaArrayListHashMap);
@@ -112,6 +115,7 @@ public   class  MainClass {
 
     	for(int i = 0; i < time; i++) {
 			tPart += Constants.filiterNumberThreshold/time;
+//    		tPart = 2000;
 			VectorBuilder vectorBuilder = new VectorBuilder(classifierTermsaArrayListHashMap, tPart, FILTER_THRESHOLD_TYPE.FILTER_THRESHOLD_TYPE_MAX, weightor);
 			vectorBuilder.setNormalization(true);
 //			IndexReader testIndexReader = IndexReader.open(FSDirectory.open(new File(Constants.CINDEX_TESTSTORE_PATH)));
@@ -129,7 +133,7 @@ public   class  MainClass {
 //			Distance distance = new MahalanobisDistance(vectorBuilder.getFeatureTermMap(), trainVectors);
 			
 //			Template template = new GaussianTemplate(Constants.CLASSIFIER_SIMILARITYFILE_PATH, vectorBuilder.getFeatureTermMap());
-			Template template = new MeanTemplate(trainVectors, false, vectorBuilder.getFeatureTermMap(), distance);
+			Template template = new GaussianTemplate(trainVectors, false, vectorBuilder.getFeatureTermMap(), distance);
 			HashMap<Integer, SimilarityRate> similarityRateHashMap = Similarity.getSimilarityRate(trainVectors, template, distance);
 			template.similarityRateHashMap = similarityRateHashMap;
 //			template.setJustProcessBros(false);
@@ -145,9 +149,16 @@ public   class  MainClass {
 //			vectorImageBuilder.saveVectorsAsBitmap(trainVectors, termsOrder);
 			
 			Date startDate = new Date();
-			Classifier classifier = new KNNClassifier(Constants.K, distance);
+//			Classifier classifier = new KNNClassifier(Constants.K, distance);
+//			Classifier classifier = new CenterClassifier(distance, CENTERCLASSIFIER_INIT_TYPE.CENTERCLASSIFIER_INIT_SAVE, Constants.CLASSIFIER_CENTERFILE_PATH);
+//			Classifier classifier = new NativeBayesClassifier(classifierTermsaArrayListHashMap, trainVectors);
 //			Classifier classifier = new CenterClassifier();
 //			Classifier classifier = new FastKNNClassifier(Constants.K, Storer.loadSimilarityHashMap(Constants.CLASSIFIER_SIMILARITYFILE_PATH));
+			HashMap<String, String> labels = SVMPreprocessor.processClassLabel(classifierTermsaArrayListHashMap.keySet(), Constants.CLASSIFIER_SVM_LABEL_PATH);
+			SVMPreprocessor.processDocumentVectorToSVMFormatFile(labels, vectorBuilder.getFeatureTermMap(), trainVectors, Constants.CLASSIFIER_SVM_TRAINFILE_PATH);
+			SVMPreprocessor.processDocumentVectorToSVMFormatFile(labels, vectorBuilder.getFeatureTermMap(), testVectors, Constants.CLASSIFIER_SVM_TESTFILE_PATH);
+		
+			Classifier classifier = new SVMClassifier(labels);
 			ArrayList<ClassifyResult> classifyResults = classifier.classifyFiles(testVectors, trainVectors);
 			Date endDate = new Date();
 			System.out.println("分类时间：" + (endDate.getTime() - startDate.getTime()));
@@ -183,8 +194,8 @@ public   class  MainClass {
 //			ArrayList<DocumentVector> trainVectors = vectorBuilder.getDocumentVectorsFromFilePath(Constants.CLASSIFIER_TRAINDOCUMENTVECTORFILE_PATH);
 			
 //			Classifier classifier = new NativeBayesClassifier(classifierTermsaArrayListHashMap, trainVectors);
-//			Classifier classifier = new KNNClassifier(Constants.K, SIMILARITY_TYPE.SIMILARITY_TYPE_COS);
-			Classifier classifier = new CenterClassifier(CENTERCLASSIFIER_INIT_TYPE.CENTERCLASSIFIER_INIT_SAVE, Constants.CLASSIFIER_CENTERFILE_PATH);
+			Classifier classifier = new KNNClassifier(Constants.K, new CosineDistance());
+//			Classifier classifier = new CenterClassifier(CENTERCLASSIFIER_INIT_TYPE.CENTERCLASSIFIER_INIT_SAVE, Constants.CLASSIFIER_CENTERFILE_PATH);
 			Date startDate = new Date();
 			ArrayList<ClassifyResult> classifyResults = classifier.classifyFiles(testVectors, trainVectors);
 			Date endDate = new Date();
@@ -261,10 +272,11 @@ public   class  MainClass {
 //			Template template = new MedianTemplate(trainVectors, true, vectorBuilder.getFeatureTermMap());
 	//		Template template = new GaussianTemplate(Constants.CLASSIFIER_SIMILARITYFILE_PATH, vectorBuilder.getFeatureTermMap());
 //			template.processTemplateOnTrainDocumentVector(trainVectors, false);
-			SVMPreprocessor.processDocumentVectorToSVMFormatFile(vectorBuilder.getFeatureTermMap(), testVectors, Constants.CLASSIFIER_SVM_TESTFILE_PATH);
-			SVMPreprocessor.processDocumentVectorToSVMFormatFile(vectorBuilder.getFeatureTermMap(), trainVectors, Constants.CLASSIFIER_SVM_TRAINFILE_PATH);
+			HashMap<String, String> labels = SVMPreprocessor.processClassLabel(classifierTermsaArrayListHashMap.keySet(), Constants.CLASSIFIER_SVM_LABEL_PATH);
+			SVMPreprocessor.processDocumentVectorToSVMFormatFile(labels, vectorBuilder.getFeatureTermMap(), testVectors, Constants.CLASSIFIER_SVM_TESTFILE_PATH);
+			SVMPreprocessor.processDocumentVectorToSVMFormatFile(labels, vectorBuilder.getFeatureTermMap(), trainVectors, Constants.CLASSIFIER_SVM_TRAINFILE_PATH);
 		
-			Classifier classifier = new SVMClassifier();
+			Classifier classifier = new SVMClassifier(labels);
 			ArrayList<ClassifyResult> classifyResults = classifier.classifyFiles(testVectors, trainVectors);
 			ResultParser.parseResult(classifyResults, true);
 		}

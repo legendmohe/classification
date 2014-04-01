@@ -7,9 +7,6 @@ import model.DocumentVector;
 
 public abstract class Classifier {
 	
-	public Classifier() {
-	}
-	
 	public ArrayList<ClassifyResult> classifyFiles(ArrayList<DocumentVector> testArrayList, ArrayList<DocumentVector> trainArrayList) {
 		
 		System.out.println("开始分类...");

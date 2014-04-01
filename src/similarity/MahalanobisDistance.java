@@ -3,6 +3,7 @@ package similarity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import Jama.Matrix;
 
 import model.DocumentVector;
 import model.FeatureTerm;
+import model.ObjectPair;
 
 public class MahalanobisDistance implements Distance {
 	
@@ -81,5 +83,22 @@ public class MahalanobisDistance implements Distance {
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public Comparator<ObjectPair<Integer, Double>> getComparator() {
+		return new Comparator<ObjectPair<Integer, Double>>() {
+			@Override
+			public int compare(ObjectPair<Integer, Double> o1,
+					ObjectPair<Integer, Double> o2) {
+				if ((Double)o1.getTwo() > (Double)o2.getTwo()) {
+					return 1;
+				}else if ((Double)o1.getTwo() < (Double)o2.getTwo()) {
+					return -1;
+				}else {
+					return 0;
+				}
+			}
+		};
 	}
 }

@@ -14,6 +14,8 @@ import controller.Storer;
 
 public class CenterClassifier extends Classifier {
 	
+	private Distance distance;
+	
 	public enum CENTERCLASSIFIER_INIT_TYPE{
 		CENTERCLASSIFIER_INIT_LOAD,
 		CENTERCLASSIFIER_INIT_SAVE
@@ -22,13 +24,14 @@ public class CenterClassifier extends Classifier {
 	private CENTERCLASSIFIER_INIT_TYPE initType;
 	private String saveFilePath;
 	
-	public CenterClassifier() {
+	public CenterClassifier(Distance distance) {
+		this.distance = distance;
 		this.initType = CENTERCLASSIFIER_INIT_TYPE.CENTERCLASSIFIER_INIT_LOAD;
 		saveFilePath = null;
 	}
 	
-	public CenterClassifier(CENTERCLASSIFIER_INIT_TYPE type, String saveFilePath){
-		super();
+	public CenterClassifier(Distance distance, CENTERCLASSIFIER_INIT_TYPE type, String saveFilePath){
+		this.distance = distance;
 		this.initType = type;
 		this.saveFilePath = saveFilePath;
 	}

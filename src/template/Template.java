@@ -20,12 +20,15 @@ public abstract class Template {
 	public double threshold;
 	private boolean justProcessBros;
 	public TEMPLATE_THRESHOLD_TYPE thresholdTpye;
-	ArrayList<Double> template;
-	public HashMap<Integer, SimilarityRate> similarityRateHashMap;
+	
+	private Distance distance;
 	private Double[][] similarHashMap;
+	protected ArrayList<Double> template;
 	protected HashMap<String, FeatureTerm> featureTermHashMap;
+	public HashMap<Integer, SimilarityRate> similarityRateHashMap;
 	
 	public Template(ArrayList<DocumentVector> trainArrayList, boolean isSaveToFile, HashMap<String, FeatureTerm> featureTermHashMap, Distance distance) {
+		this.setDistance(distance);
 		this.setSimilarHashMap(Similarity.getSimilarityMap(trainArrayList, distance));
 		this.featureTermHashMap = featureTermHashMap;
 		template = this.getTemplate(Constants.TemplateRadios);
@@ -80,19 +83,7 @@ public abstract class Template {
 				}
 			}
 			
-			Collections.sort(simEntries, new Comparator<ObjectPair<Integer, Double>>() {
-				@Override
-				public int compare(ObjectPair<Integer, Double> o1,
-						ObjectPair<Integer, Double> o2) {
-					if ((Double)o1.getTwo() > (Double)o2.getTwo()) {
-						return -1;
-					}else if ((Double)o1.getTwo() < (Double)o2.getTwo()) {
-						return 1;
-					}else {
-						return 0;
-					}
-				}
-			});
+			Collections.sort(simEntries, distance.getComparator());
 			
 			double threshold = this.threshold;
 			if (this.similarityRateHashMap != null) {
@@ -157,6 +148,16 @@ public abstract class Template {
 
 	public void setThresholdTpye(TEMPLATE_THRESHOLD_TYPE thresholdTpye) {
 		this.thresholdTpye = thresholdTpye;
+	}
+
+
+	public Distance getDistance() {
+		return distance;
+	}
+
+
+	public void setDistance(Distance distance) {
+		this.distance = distance;
 	}
 
 }

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import classifier.Classifier;
 
@@ -15,10 +16,19 @@ import model.ClassifyResult;
 import model.DocumentVector;
 
 public class SVMClassifier extends Classifier {
+	
+	private HashMap<String, String> labels;
+	
+	public SVMClassifier(HashMap<String, String> labels) {
+		this.labels = new HashMap<String, String>();
+		for (String classname : labels.keySet()) { // inverst
+			this.labels.put(labels.get(classname), classname);
+		}
+	}
 
 	@Override
 	protected ArrayList<ClassifyResult> classify(
-			ArrayList<DocumentVector> testTrainArrayList,
+			ArrayList<DocumentVector> testArrayList,
 			ArrayList<DocumentVector> trainArrayList) {
 
 		String[] trainArgs = {Constants.CLASSIFIER_SVM_TRAINFILE_PATH, Constants.CLASSIFIER_SVM_MODELFILE_PATH};//directory of training file
@@ -30,10 +40,10 @@ public class SVMClassifier extends Classifier {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return this.resultsFromSVMResultFile(Constants.CLASSIFIER_SVM_RESULTFILE_PATH,trainArrayList);
+		return this.resultsFromSVMResultFile(Constants.CLASSIFIER_SVM_RESULTFILE_PATH,testArrayList);
 	}
 
-	public ArrayList<ClassifyResult> resultsFromSVMResultFile(String filePath, ArrayList<DocumentVector> trainArrayList) {
+	public ArrayList<ClassifyResult> resultsFromSVMResultFile(String filePath, ArrayList<DocumentVector> testArrayList) {
 		File file = new File(filePath);
 		if (file.exists() == false) {
 			System.err.println("svmresult文件不存在:" + filePath);
@@ -45,10 +55,11 @@ public class SVMClassifier extends Classifier {
 			bufferedReader = new BufferedReader(new FileReader(file));
 			int index = 0;
 			String readLine = null;
-			while ((readLine = bufferedReader.readLine()) != null && index < trainArrayList.size()) {
-				String resultClass = String.valueOf((int)Double.parseDouble(readLine));//类别为数字时
+			while ((readLine = bufferedReader.readLine()) != null && index < testArrayList.size()) {
+				String resultClass = this.labels.get(readLine); //类别数字
 				ClassifyResult result = new ClassifyResult();
-				DocumentVector documentVector = trainArrayList.get(index);
+//				System.out.println(index + "|" + testArrayList.get(index).getDoc() + "|" + testArrayList.get(index).getClassName());
+				DocumentVector documentVector = testArrayList.get(index);
 				result.setOriginalClassString(documentVector.getClassName());
 				result.setClassString(resultClass);
 				result.setDoc(documentVector.getDoc());

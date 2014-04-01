@@ -1,6 +1,9 @@
 package similarity;
 
+import java.util.Comparator;
+
 import model.DocumentVector;
+import model.ObjectPair;
 
 public class CosineDistance implements Distance {
 
@@ -32,6 +35,23 @@ public class CosineDistance implements Distance {
 		similarity = ijSum/Math.sqrt(iSum*jSum);//cos相似度计算
 		
 		return similarity;
+	}
+
+	@Override
+	public Comparator<ObjectPair<Integer, Double>> getComparator() {
+		return new Comparator<ObjectPair<Integer, Double>>() {
+			@Override
+			public int compare(ObjectPair<Integer, Double> o1,
+					ObjectPair<Integer, Double> o2) {
+				if ((Double)o1.getTwo() > (Double)o2.getTwo()) {
+					return -1;
+				}else if ((Double)o1.getTwo() < (Double)o2.getTwo()) {
+					return 1;
+				}else {
+					return 0;
+				}
+			}
+		};
 	}
 
 }

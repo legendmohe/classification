@@ -72,7 +72,7 @@ public class Similarity {
 		HashMap<Integer, ObjectPair<Integer, Double>> eachFirstMetHashMap = new HashMap<Integer, ObjectPair<Integer, Double>>();
 		HashMap<Integer, ObjectPair<Integer, Double>> eachBroInRangeHashMap = new HashMap<Integer, ObjectPair<Integer, Double>>();
 		for (double i = 0; i <= 1.0; i += 0.1) {
-			double threshold = Math.round(i*100)/100.0;
+			double threshold = Math.round(i*100)/100.0; //保留两位小数点
 			System.out.println("开始计算：threshold=" + threshold);
 
 			ArrayList<DocumentVector> trainArrayList = new ArrayList<DocumentVector>();
@@ -92,26 +92,7 @@ public class Similarity {
 			HashMap<String, Double> firstMetHashMap = new HashMap<String, Double>();
 			HashMap<String, Double> broInRangeHashMap = new HashMap<String, Double>();
 			HashMap<String, Integer> classNumberHashMap = new HashMap<String, Integer>();
-//			for (Integer doc1 : similarityHashMap.keySet()) {
-//			for (int doc1 = 0; doc1 < simM.length; doc1++) {
 			for (DocumentVector curDocumentVector:trainArrayList) {
-//				HashMap<Integer, Double> simMap = similarityHashMap.get(doc1);
-//				ArrayList<Map.Entry<Integer, Double>> simEntries = new ArrayList<Map.Entry<Integer, Double>>();
-//				simEntries.addAll(simMap.entrySet());
-//				Collections.sort(simEntries, new Comparator<Map.Entry<Integer, Double>>() {
-//					@Override
-//					public int compare(Entry<Integer, Double> o1,
-//							Entry<Integer, Double> o2) {
-//						if (o1.getValue() > o2.getValue()) {
-//							return -1;
-//						}else if (o1.getValue() < o2.getValue()) {
-//							return 1;
-//						}else {
-//							return 0;
-//						}
-//					}
-//				});
-//				DocumentVector curDocumentVector = doc2DocumentHashMap.get(doc1);
 				int doc1 = curDocumentVector.getDoc();
 				ArrayList<ObjectPair<Integer, Double>> simEntries = new ArrayList<ObjectPair<Integer, Double>>();
 				for (DocumentVector documentVector2: trainArrayList) {
@@ -119,19 +100,8 @@ public class Similarity {
 					simEntries.add(new ObjectPair<Integer, Double>(doc2, simM[doc1][doc2]));
 				}
 								
-				Collections.sort(simEntries, new Comparator<ObjectPair<Integer, Double>>() {
-					@Override
-					public int compare(ObjectPair<Integer, Double> o1,
-							ObjectPair<Integer, Double> o2) {
-						if ((Double)o1.getTwo() > (Double)o2.getTwo()) {
-							return -1;
-						}else if ((Double)o1.getTwo() < (Double)o2.getTwo()) {
-							return 1;
-						}else {
-							return 0;
-						}
-					}
-				});
+				Collections.sort(simEntries, distance.getComparator());
+				
 				simEntries.remove(0); //remove self
 				Integer classNumberInteger = classNumberHashMap.get(curDocumentVector.getClassName());
 				if (classNumberInteger == null) {
